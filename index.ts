@@ -1,8 +1,49 @@
-import { registerRootComponent } from 'expo';
-
-import App from './App';
-
-// registerRootComponent calls AppRegistry.registerComponent('main', () => App);
-// It also ensures that whether you load the app in Expo Go or in a native build,
-// the environment is set up appropriately
-registerRootComponent(App);
+{
+  "name": "babyguard",
+  "version": "1.0.0",
+  "main": "node_modules/expo/AppEntry.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "eject": "expo eject"
+  },
+  "dependencies": {
+    "@expo/vector-icons": "^15.0.2",
+    "@react-native-async-storage/async-storage": "2.2.0",
+    "@react-native-community/datetimepicker": "8.4.4",
+    "@react-native-community/netinfo": "11.4.1",
+    "@react-navigation/bottom-tabs": "^6.5.8",
+    "@react-navigation/native": "^6.1.7",
+    "@react-navigation/stack": "^6.3.17",
+    "expo-auth-session": "~7.0.8",
+    "expo-crypto": "~15.0.7",
+    "expo-file-system": "~19.0.14",
+    "expo-linear-gradient": "~15.0.7",
+    "expo-notifications": "~0.32.11",
+    "expo-secure-store": "~15.0.7",
+    "expo-sharing": "~14.0.7",
+    "expo-status-bar": "~3.0.8",
+    "firebase": "^10.3.1",
+    "react": "18.2.0",
+    "react-native": "0.71.8",
+    "react-native-chart-kit": "^6.12.0",
+    "react-native-gesture-handler": "~2.28.0",
+    "react-native-paper": "^5.10.4",
+    "react-native-reanimated": "~4.1.0",
+    "react-native-safe-area-context": "~5.6.0",
+    "react-native-screens": "~4.16.0",
+    "react-native-svg": "13.9.0",
+    "react-native-vector-icons": "^10.0.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.20.0",
+    "@types/react": "~18.2.14",
+    "@types/react-native": "~0.72.2",
+    "babel-preset-expo": "^54.0.2",
+    "expo": "^54.0.9",
+    "typescript": "^5.1.3"
+  },
+  "private": true
+}
