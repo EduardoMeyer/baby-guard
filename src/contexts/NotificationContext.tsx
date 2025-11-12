@@ -1,8 +1,43 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import * as Notifications from 'expo-notifications';
-import NotificationService from '../services/NotificationService';
+import React, { createContext, useContext, useState } from 'react';
+// import * as Notifications from 'expo-notifications';
+// import NotificationService from '../services/NotificationService';
 import { NotificationSettings } from '../types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// Mock NotificationService para desenvolvimento
+class MockNotificationService {
+  static getInstance() {
+    return new MockNotificationService();
+  }
+  
+  async initialize() {
+    console.log('📱 Mock NotificationService inicializado');
+  }
+  
+  async cancelAllNotifications() {
+    console.log('🔕 Mock: Todas notificações canceladas');
+  }
+  
+  async scheduleFeedingReminder(hours: number) {
+    console.log(`🍼 Mock: Lembrete de alimentação agendado para ${hours}h`);
+  }
+  
+  async scheduleSleepReminder(time: Date) {
+    console.log('😴 Mock: Lembrete de sono agendado para', time);
+  }
+  
+  async scheduleNotification(notification: any) {
+    console.log('🔔 Mock: Notificação agendada:', notification.title);
+  }
+  
+  addNotificationReceivedListener(callback: any) {
+    return { remove: () => {} };
+  }
+  
+  addNotificationResponseReceivedListener(callback: any) {
+    return { remove: () => {} };
+  }
+}
 
 interface NotificationContextType {
   notificationService: NotificationService;
@@ -31,23 +66,14 @@ const defaultSettings: NotificationSettings = {
 };
 
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [notificationService] = useState(() => NotificationService.getInstance());
+  const [notificationService] = useState(() => MockNotificationService.getInstance());
   const [settings, setSettings] = useState<NotificationSettings>(defaultSettings);
-  const [hasPermission, setHasPermission] = useState(false);
-
-  useEffect(() => {
-    initializeNotifications();
-    loadSettings();
-    setupNotificationListeners();
-  }, []);
+  const [hasPermission, setHasPermission] = useState(true); // Mock sempre tem permissão
 
   const initializeNotifications = async () => {
     try {
       await notificationService.initialize();
-      
-      // Verificar permissões
-      const { status } = await Notifications.getPermissionsAsync();
-      setHasPermission(status === 'granted');
+      console.log('📱 Mock: Notificações inicializadas (modo desenvolvimento)');
     } catch (error) {
       console.error('Erro ao inicializar notificações:', error);
     }
@@ -78,20 +104,10 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   };
 
   const requestPermission = async (): Promise<boolean> => {
-    try {
-      const { status } = await Notifications.requestPermissionsAsync();
-      const granted = status === 'granted';
-      setHasPermission(granted);
-      
-      if (granted) {
-        await notificationService.initialize();
-      }
-      
-      return granted;
-    } catch (error) {
-      console.error('Erro ao solicitar permissão de notificação:', error);
-      return false;
-    }
+    console.log('📱 Mock: Permissão de notificação concedida (modo desenvolvimento)');
+    setHasPermission(true);
+    await notificationService.initialize();
+    return true;
   };
 
   const rescheduleNotifications = async (newSettings: NotificationSettings) => {
@@ -113,83 +129,11 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     // Outras notificações podem ser reagendadas aqui conforme necessário
   };
 
-  const setupNotificationListeners = () => {
-    // Listener para notificações recebidas enquanto o app está em primeiro plano
-    const receivedListener = notificationService.addNotificationReceivedListener(
-      (notification: Notifications.Notification) => {
-        console.log('Notificação recebida:', notification);
-        // Aqui você pode adicionar lógica adicional, como mostrar um modal ou atualizar o estado
-      }
-    );
-
-    // Listener para quando o usuário toca na notificação
-    const responseListener = notificationService.addNotificationResponseReceivedListener(
-      (response: Notifications.NotificationResponse) => {
-        console.log('Resposta da notificação:', response);
-        
-        const { actionIdentifier, notification } = response;
-        const notificationData = notification.request.content.data;
-
-        // Tratar diferentes tipos de ações
-        switch (actionIdentifier) {
-          case 'mark-fed':
-            // Marcar como alimentado
-            handleMarkFed();
-            break;
-          case 'snooze':
-            // Adiar por 30 minutos
-            handleSnoozeFeeding();
-            break;
-          case 'view-details':
-            // Navegar para tela de detalhes
-            handleViewDetails(notificationData);
-            break;
-          default:
-            // Ação padrão (tocar na notificação)
-            handleDefaultAction(notificationData);
-            break;
-        }
-      }
-    );
-
-    // Cleanup listeners quando o componente for desmontado
-    return () => {
-      receivedListener.remove();
-      responseListener.remove();
-    };
-  };
-
-  const handleMarkFed = async () => {
-    // Implementar lógica para marcar como alimentado
-    console.log('Bebê marcado como alimentado');
-    // Aqui você pode adicionar um registro de alimentação automaticamente
-  };
-
-  const handleSnoozeFeeding = async () => {
-    // Adiar lembrete de alimentação por 30 minutos
-    const snoozeTime = new Date();
-    snoozeTime.setMinutes(snoozeTime.getMinutes() + 30);
-    
-    await notificationService.scheduleNotification({
-      id: 'feeding-snooze',
-      title: '🍼 Lembrete Adiado',
-      body: 'Hora de alimentar o bebê! (Lembrete adiado)',
-      trigger: { date: snoozeTime },
-      data: { type: 'feeding-reminder-snooze' },
-    });
-  };
-
-  const handleViewDetails = (notificationData: any) => {
-    // Navegar para a tela apropriada baseado no tipo de notificação
-    console.log('Visualizar detalhes:', notificationData);
-    // Implementar navegação aqui
-  };
-
-  const handleDefaultAction = (notificationData: any) => {
-    // Ação padrão quando o usuário toca na notificação
-    console.log('Ação padrão da notificação:', notificationData);
-    // Implementar navegação ou ação padrão aqui
-  };
+  // Inicializar ao montar o componente
+  React.useEffect(() => {
+    initializeNotifications();
+    loadSettings();
+  }, []);
 
   const value = {
     notificationService,
